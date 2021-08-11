@@ -39,6 +39,7 @@
 }
 
 .menu a {
+  position: relative;
   color: inherit;
   text-decoration: none;
   display: block;
@@ -47,17 +48,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: background-color 100ms ease-in;
-  border-left: 3px solid transparent;
 }
 
 .menu a:hover {
   background-color: rgba(255, 255, 255, 0.05);
-  border-left-color: hsl(184, 20%, 30%);
 }
 
 .menu a.active {
   background-color: rgba(255, 255, 255, 0.1);
-  border-left-color: #4abec7;
 }
 
 .appVersion {
@@ -107,4 +105,29 @@
 .search:active {
   border: 2px solid #4abec7;
   outline: 0;
+}
+
+.counts {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+.count {
+  width: 4px;
+}
+
+.count[data-label='completed'] {
+  background-color: #54a854;
+}
+
+.count[data-label='failed'] {
+  background-color: #d53f3f;
+}
+
+.count[data-label='waiting'] {
+  background-color: #cbd5e0;
 }
