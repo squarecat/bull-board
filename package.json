@@ -96,5 +96,8 @@
       "release": true
     },
     "npm": false
+  },
+  "dependencies": {
+    "watch": "^1.0.2"
   }
 }

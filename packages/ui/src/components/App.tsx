@@ -1,14 +1,16 @@
-import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { useScrollTopOnNav } from '../hooks/useScrollTopOnNav';
-import { useStore } from '../hooks/useStore';
+
 import { Api } from '../services/Api';
+import { ConfirmModal } from './ConfirmModal/ConfirmModal';
+import { Dashboard } from './Dashboard/Dashboard';
 import { Header } from './Header/Header';
 import { Menu } from './Menu/Menu';
 import { QueuePage } from './QueuePage/QueuePage';
+import React from 'react';
 import { RedisStats } from './RedisStats/RedisStats';
-import { ConfirmModal } from './ConfirmModal/ConfirmModal';
+import { ToastContainer } from 'react-toastify';
+import { useScrollTopOnNav } from '../hooks/useScrollTopOnNav';
+import { useStore } from '../hooks/useStore';
 
 export const App = ({ api }: { api: Api }) => {
   useScrollTopOnNav();
@@ -24,6 +26,9 @@ export const App = ({ api }: { api: Api }) => {
           ) : (
             <>
               <Switch>
+                <Route path="/dashboard" exact>
+                  <Dashboard />
+                </Route>
                 <Route
                   path="/queue/:name"
                   render={({ match: { params } }) => {
@@ -40,13 +45,14 @@ export const App = ({ api }: { api: Api }) => {
                   }}
                 />
 
-                <Route path="/" exact>
+                <Route path="/queue" exact>
                   {!!state.data &&
                     Array.isArray(state.data?.queues) &&
                     state.data.queues.length > 0 && (
                       <Redirect to={`/queue/${encodeURIComponent(state.data?.queues[0].name)}`} />
                     )}
                 </Route>
+                <Redirect to="/dashboard" />
               </Switch>
               <ConfirmModal {...confirmProps} />
             </>

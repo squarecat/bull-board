@@ -1,3 +1,5 @@
+import { allStatsHandler, queueStatsHandler } from './handlers/stats';
+
 import { AppRouteDefs } from '../typings/app';
 import { cleanAllHandler } from './handlers/cleanAll';
 import { cleanJobHandler } from './handlers/cleanJob';
@@ -13,7 +15,7 @@ import { retryJobHandler } from './handlers/retryJob';
 export const appRoutes: AppRouteDefs = {
   entryPoint: {
     method: 'get',
-    route: ['/', '/queue/:queueName'],
+    route: ['/', '/dashboard', '/queue/:queueName'],
     handler: entryPoint,
   },
   api: [
@@ -22,6 +24,16 @@ export const appRoutes: AppRouteDefs = {
       method: 'get',
       route: '/api/queues/:queueName/:jobId/logs',
       handler: jobLogsHandler,
+    },
+    {
+      method: 'get',
+      route: '/api/stats',
+      handler: allStatsHandler,
+    },
+    {
+      method: 'get',
+      route: '/api/stats/:queueName',
+      handler: queueStatsHandler,
     },
     {
       method: 'put',

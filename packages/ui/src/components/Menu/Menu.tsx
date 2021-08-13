@@ -1,7 +1,7 @@
+import { NavLink, useRouteMatch } from 'react-router-dom';
 import React, { useState } from 'react';
 
 import { AppQueue } from '@bull-board/api/typings/app';
-import { NavLink } from 'react-router-dom';
 import { STATUS_LIST } from '../../constants/status-list';
 import { SearchIcon } from '../Icons/Search';
 import { Store } from '../../hooks/useStore';
@@ -15,69 +15,97 @@ export const Menu = ({
   queues: AppQueue[] | undefined;
   selectedStatuses: Store['selectedStatuses'];
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
+  const isQueuesRoute = useRouteMatch('/queue');
   return (
     <aside className={s.aside}>
-      <div className={s.secondary}>QUEUES</div>
-
-      {(queues?.length || 0) > 5 && (
-        <div className={s.searchWrapper}>
-          <SearchIcon />
-          <input
-            className={s.search}
-            type="search"
-            id="search-queues"
-            placeholder="Filter queues"
-            value={searchTerm}
-            onChange={({ currentTarget }) => setSearchTerm(currentTarget.value)}
-          />
-        </div>
-      )}
       <nav>
-        {!!queues && (
-          <ul className={s.menu}>
-            {queues
-              .filter(({ name }) => name.includes(searchTerm))
-              .map(({ name: queueName, isPaused, counts }) => {
-                const p = calculateCountPercentages(counts);
-                return (
-                  <li key={queueName}>
-                    <NavLink
-                      to={`/queue/${encodeURIComponent(queueName)}${
-                        !selectedStatuses[queueName] ||
-                        selectedStatuses[queueName] === STATUS_LIST[0]
-                          ? ''
-                          : `?status=${selectedStatuses[queueName]}`
-                      }`}
-                      activeClassName={s.active}
-                      title={queueName}
-                    >
-                      {queueName} {isPaused && <span className={s.isPaused}>[ Paused ]</span>}
-                      <span className={s.counts}>
-                        {p.map(({ percentage, label, count }) => {
-                          return (
-                            <span
-                              key={label}
-                              className={s.count}
-                              style={{ height: `${percentage}%` }}
-                              data-count={count}
-                              data-label={label}
-                            ></span>
-                          );
-                        })}
-                      </span>
-                    </NavLink>
-                  </li>
-                );
-              })}
-          </ul>
-        )}
+        <ul className={s.menu}>
+          <li key="dashboard">
+            <NavLink to="/dashboard" activeClassName={s.active} title="Dashboard">
+              DASHBOARD
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/queue" activeClassName={s.active} title="Queues">
+              QUEUES
+            </NavLink>
+          </li>
+          {isQueuesRoute ? (
+            <li>
+              <Queues queues={queues} selectedStatuses={selectedStatuses} />
+            </li>
+          ) : null}
+        </ul>
       </nav>
       <div className={cn(s.appVersion, s.secondary)}>{process.env.APP_VERSION}</div>
     </aside>
   );
 };
+
+function Queues({
+  queues,
+  selectedStatuses,
+}: {
+  queues: AppQueue[] | undefined;
+  selectedStatuses: Store['selectedStatuses'];
+}) {
+  const [searchTerm, setSearchTerm] = useState('');
+  if (!queues) {
+    return null;
+  }
+  return (
+    <ul className={s.menu}>
+      <li>
+        {(queues?.length || 0) > 5 && (
+          <div className={s.searchWrapper}>
+            <SearchIcon />
+            <input
+              className={s.search}
+              type="search"
+              id="search-queues"
+              placeholder="Filter queues"
+              value={searchTerm}
+              onChange={({ currentTarget }) => setSearchTerm(currentTarget.value)}
+            />
+          </div>
+        )}
+      </li>
+      {queues
+        .filter(({ name }) => name.includes(searchTerm))
+        .map(({ name: queueName, isPaused, counts }) => {
+          const p = calculateCountPercentages(counts);
+          return (
+            <li key={queueName}>
+              <NavLink
+                to={`/queue/${encodeURIComponent(queueName)}${
+                  !selectedStatuses[queueName] || selectedStatuses[queueName] === STATUS_LIST[0]
+                    ? ''
+                    : `?status=${selectedStatuses[queueName]}`
+                }`}
+                activeClassName={s.active}
+                title={queueName}
+              >
+                {queueName} {isPaused && <span className={s.isPaused}>[ Paused ]</span>}
+                <span className={s.counts}>
+                  {p.map(({ percentage, label, count }) => {
+                    return (
+                      <span
+                        key={label}
+                        className={s.count}
+                        style={{ height: `${percentage}%` }}
+                        data-count={count}
+                        data-label={label}
+                      ></span>
+                    );
+                  })}
+                </span>
+              </NavLink>
+            </li>
+          );
+        })}
+    </ul>
+  );
+}
 
 const shown: string[] = ['completed', 'waiting', 'failed'];
 type PercentageArray = { count: number; percentage: number; label: string }[];
