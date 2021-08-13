@@ -48,11 +48,14 @@ type Stat = {
 export const Dashboard = React.memo(() => {
   const [stats, setStats] = useState<Stat[]>([]);
   useEffect(() => {
-    fetch('/api/stats/3af3c1b6-d718-4236-ae5e-d1cfbce30ef5')
+    fetch('/api/stats')
       .then((res) => res.json())
-      .then((s) =>
-        setStats(s.map((d: any) => ({ status: d.status, x: new Date(d.processed), y: d.value })))
-      );
+      .then((s) => {
+        const stats = [...s.completed, ...s.failed];
+        setStats(
+          stats.map((d: any) => ({ status: d.status, x: new Date(d.processed), y: d.value }))
+        );
+      });
   }, []);
 
   console.log(stats);
