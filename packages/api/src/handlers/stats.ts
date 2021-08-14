@@ -28,9 +28,11 @@ async function getStatsForQueue(queue: BaseAdapter, since: any): Promise<Item[]>
   // there's no great way to get all the jobs and then get
   // the state of each one, so we just fetch each job
   // type here
-  const completedJobs = await queue.getJobs(['completed']);
-  const waitingJobs = await queue.getJobs(['waiting']);
-  const failedJobs = await queue.getJobs(['failed']);
+  const [completedJobs, waitingJobs, failedJobs] = await Promise.all([
+    queue.getJobs(['completed']),
+    queue.getJobs(['waiting']),
+    queue.getJobs(['failed']),
+  ]);
   const allJobsInPeriod = [
     ...completedJobs.map(mapStatus('completed')),
     ...waitingJobs.map(mapStatus('waiting')),
@@ -73,13 +75,9 @@ async function queueStats(
   };
 }
 
-async function allQueueStats(queues: BaseAdapter[]) {
+function allQueueStats(queues: BaseAdapter[]) {
   const last24Hours = subHours(Date.now(), 24);
-  return await Promise.all(
-    queues.map(async (queue) => {
-      return getStatsForQueue(queue, last24Hours);
-    })
-  );
+  return Promise.all(queues.map((queue) => getStatsForQueue(queue, last24Hours)));
 }
 
 export const allStatsHandler = async ({
@@ -123,6 +121,7 @@ export const allStatsHandler = async ({
     body: {
       completed: mapGroup(grouped.completed),
       failed: mapGroup(grouped.failed),
+      ungrouped: queueStats,
     },
   };
 };
